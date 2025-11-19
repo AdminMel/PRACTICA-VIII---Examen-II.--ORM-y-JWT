@@ -1,6 +1,5 @@
 package com.upiiz.ligas.config;
 
-import com.upiiz.ligas.security.CustomUserDetailsService;
 import com.upiiz.ligas.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,30 +26,33 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Auth y Swagger públicos
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/swagger-ui/**"
                         ).permitAll()
 
-                        // Endpoints públicos sugeridos (GET):
-                        .requestMatchers(HttpMethod.GET, "/api/jugadores/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/equipos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/ligas/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/entrenadores/**").permitAll()
+                        // Endpoints GET públicos
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/jugadores",
+                                "/api/equipos",
+                                "/api/ligas",
+                                "/api/entrenadores"
+                        ).permitAll()
 
-                        // Todo lo demás autenticado
+                        // Todo lo demás requiere JWT
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -67,14 +70,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config
     ) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
