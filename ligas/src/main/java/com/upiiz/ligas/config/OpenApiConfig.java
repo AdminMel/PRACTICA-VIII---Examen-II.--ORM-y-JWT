@@ -2,6 +2,9 @@ package com.upiiz.ligas.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -10,7 +13,16 @@ import org.springframework.context.annotation.Configuration;
                 title = "API de Ligas Deportivas",
                 version = "1.0",
                 description = "API REST segura para gestión de ligas, equipos, jugadores y entrenadores"
-        )
+        ),
+        security = {
+                @SecurityRequirement(name = "bearerAuth")
+        }
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
 )
 public class OpenApiConfig {
 }
