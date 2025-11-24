@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "auth-controller", description = "Autenticación y registro de usuarios")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
@@ -143,3 +144,4 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 }
+
