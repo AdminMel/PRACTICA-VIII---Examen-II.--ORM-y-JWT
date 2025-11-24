@@ -20,6 +20,7 @@ import java.util.List;
 @RequestMapping("/api/entrenadores")
 @RequiredArgsConstructor
 @Tag(name = "entrenador-controller", description = "Operaciones relacionadas con entrenadores")
+@CrossOrigin(origins = "*")
 public class EntrenadorController {
 
     private final EntrenadorService entrenadorService;
@@ -151,3 +152,4 @@ public class EntrenadorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 }
+
