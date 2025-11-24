@@ -20,6 +20,7 @@ import java.util.List;
 @RequestMapping("/api/ligas")
 @RequiredArgsConstructor
 @Tag(name = "liga-controller", description = "Operaciones relacionadas con ligas")
+@CrossOrigin(origins = "*")
 public class LigaController {
 
     private final LigaService ligaService;
@@ -151,3 +152,4 @@ public class LigaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 }
+
