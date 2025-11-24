@@ -17,7 +17,18 @@ public class JugadorService {
         return jugadorRepository.findAll();
     }
 
-    public Jugador save(Jugador jugador) {
+    public Jugador findById(Long id) {
+        return jugadorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Jugador no encontrado con id " + id));
+    }
+
+    public Jugador create(Jugador jugador) {
+        return jugadorRepository.save(jugador);
+    }
+
+    public Jugador update(Long id, Jugador jugador) {
+        Jugador existente = findById(id);
+        jugador.setId(existente.getId());
         return jugadorRepository.save(jugador);
     }
 
