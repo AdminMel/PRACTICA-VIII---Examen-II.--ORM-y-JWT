@@ -17,7 +17,18 @@ public class EquipoService {
         return equipoRepository.findAll();
     }
 
-    public Equipo save(Equipo equipo) {
+    public Equipo findById(Long id) {
+        return equipoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Equipo no encontrado con id " + id));
+    }
+
+    public Equipo create(Equipo equipo) {
+        return equipoRepository.save(equipo);
+    }
+
+    public Equipo update(Long id, Equipo equipo) {
+        Equipo existente = findById(id);
+        equipo.setId(existente.getId());
         return equipoRepository.save(equipo);
     }
 
