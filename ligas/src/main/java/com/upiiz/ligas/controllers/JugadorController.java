@@ -17,6 +17,7 @@ import java.util.List;
 @RequestMapping("/api/jugadores")
 @RequiredArgsConstructor
 @Tag(name = "jugador-controller", description = "Operaciones relacionadas con jugadores")
+@CrossOrigin(origins = "*")
 public class JugadorController {
 
     private final JugadorService jugadorService;
@@ -53,3 +54,4 @@ public class JugadorController {
         return ResponseEntity.noContent().build();
     }
 }
+
