@@ -17,6 +17,7 @@ import java.util.List;
 @RequestMapping("/api/equipos")
 @RequiredArgsConstructor
 @Tag(name = "equipo-controller", description = "Operaciones relacionadas con equipos")
+@CrossOrigin(origins = "*")
 public class EquipoController {
 
     private final EquipoService equipoService;
@@ -53,3 +54,4 @@ public class EquipoController {
         return ResponseEntity.noContent().build();
     }
 }
+
