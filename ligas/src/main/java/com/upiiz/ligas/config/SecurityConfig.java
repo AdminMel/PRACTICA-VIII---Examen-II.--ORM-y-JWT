@@ -88,15 +88,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // 👇 Bean de CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
 
-        // Orígenes permitidos (ajusta según uses)
         cfg.setAllowedOrigins(List.of(
-                "http://localhost:4200"   // Angular
-                // Agrega más si ocupas: "http://localhost:8080", etc.
+                "http://localhost:4200"   
         ));
 
         // Métodos permitidos
@@ -113,4 +110,5 @@ public class SecurityConfig {
         return src;
     }
 }
+
 
