@@ -18,6 +18,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -32,10 +37,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})   // 👈 Habilitar CORS usando el bean de abajo
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // 👉 MUY IMPORTANTE: permitir preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Auth y Swagger públicos
                         .requestMatchers(
                                 "/api/auth/**",
@@ -44,13 +53,21 @@ public class SecurityConfig {
                                 "/swagger-ui/**"
                         ).permitAll()
 
-                        // Endpoints GET públicos
+                        // Endpoints GET públicos (lista + detalle)
                         .requestMatchers(HttpMethod.GET,
                                 "/api/jugadores/**",
                                 "/api/equipos/**",
                                 "/api/ligas/**",
                                 "/api/entrenadores/**"
-                        ).permitAll()             
+                        ).permitAll()
+
+                        // 👇 Si QUIERES que actualizar sea público, descomenta esto
+                        // .requestMatchers(HttpMethod.PUT,
+                        //         "/api/jugadores/**",
+                        //         "/api/equipos/**",
+                        //         "/api/ligas/**",
+                        //         "/api/entrenadores/**"
+                        // ).permitAll()
 
                         // Todo lo demás requiere JWT
                         .anyRequest().authenticated()
@@ -80,9 +97,29 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // 👇 Bean de CORS
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+
+        // Orígenes permitidos (ajusta según uses)
+        cfg.setAllowedOrigins(List.of(
+                "http://localhost:4200"   // Angular
+                // Agrega más si ocupas: "http://localhost:8080", etc.
+        ));
+
+        // Métodos permitidos
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        // Headers permitidos
+        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        // Si usas cookies / credenciales
+        cfg.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
+    }
 }
-
-
-
-
-
