@@ -46,10 +46,10 @@ public class SecurityConfig {
 
                         // Endpoints GET públicos
                         .requestMatchers(HttpMethod.GET,
-                                "/api/jugadores",
-                                "/api/equipos",
-                                "/api/ligas",
-                                "/api/entrenadores"
+                                "/api/jugadores/**",
+                                "/api/equipos/**",
+                                "/api/ligas/**",
+                                "/api/entrenadores/**"
                         ).permitAll()
 
                         // Todo lo demás requiere JWT
@@ -81,5 +81,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
 
 
