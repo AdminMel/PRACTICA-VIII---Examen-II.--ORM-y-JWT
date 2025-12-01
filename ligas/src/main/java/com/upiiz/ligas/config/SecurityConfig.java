@@ -37,12 +37,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})   // 👈 Habilitar CORS usando el bean de abajo
+                .cors(cors -> {})   
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 👉 MUY IMPORTANTE: permitir preflight
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Auth y Swagger públicos
@@ -53,7 +53,6 @@ public class SecurityConfig {
                                 "/swagger-ui/**"
                         ).permitAll()
 
-                        // Endpoints GET públicos (lista + detalle)
                         .requestMatchers(HttpMethod.GET,
                                 "/api/jugadores/**",
                                 "/api/equipos/**",
@@ -61,15 +60,6 @@ public class SecurityConfig {
                                 "/api/entrenadores/**"
                         ).permitAll()
 
-                        // 👇 Si QUIERES que actualizar sea público, descomenta esto
-                        // .requestMatchers(HttpMethod.PUT,
-                        //         "/api/jugadores/**",
-                        //         "/api/equipos/**",
-                        //         "/api/ligas/**",
-                        //         "/api/entrenadores/**"
-                        // ).permitAll()
-
-                        // Todo lo demás requiere JWT
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -123,3 +113,4 @@ public class SecurityConfig {
         return src;
     }
 }
+
