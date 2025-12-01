@@ -51,6 +51,18 @@ public class SecurityConfig {
                                 "/api/ligas/**",
                                 "/api/entrenadores/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/jugadores/**",
+                                "/api/equipos/**",
+                                "/api/ligas/**",
+                                "/api/entrenadores/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/jugadores/**",
+                                "/api/equipos/**",
+                                "/api/ligas/**",
+                                "/api/entrenadores/**"
+                        ).permitAll()               
 
                         // Todo lo demás requiere JWT
                         .anyRequest().authenticated()
@@ -81,6 +93,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
 
 
 
