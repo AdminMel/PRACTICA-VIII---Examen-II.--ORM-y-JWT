@@ -52,25 +52,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ En producción: pon aquí el/los dominios exactos de tu front
-        // Si estás probando desde localhost agrega localhost:4200 también.
-        config.setAllowedOrigins(List.of(
-                "http://localhost:4200"
-                // "https://TU-FRONT.onrender.com"
-        ));
+    // ✅ Para Render / múltiples dominios (más flexible que allowedOrigins)
+    config.setAllowedOriginPatterns("*");
 
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true);
+    config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setExposedHeaders(List.of("Authorization"));
+    config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -82,3 +78,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
