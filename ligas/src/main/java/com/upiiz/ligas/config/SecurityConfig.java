@@ -40,9 +40,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->
                         auth
-                            .requestMatchers("/empresa/public/v1/auth/login").permitAll()
-                            .requestMatchers("/empresa/public/v1/auth/registro").permitAll()
-                            .anyRequest().authenticated()//clientes,productos,categorias - Enviar el Token para cada solicitud
+                            .requestMatchers("/api/auth/register").permitAll()
+                            .requestMatchers("/api/auth/login").permitAll()
+                            .requestMatchers("/api/auth/login").permitAll()           
+                            .anyRequest().authenticated("/swagger-ui/*")//clientes,productos,categorias - Enviar el Token para cada solicitud
                 )
                 .sessionManagement(sesiones ->
                         sesiones.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -63,4 +64,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
 
