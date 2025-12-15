@@ -29,12 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // ✅ Preflight CORS (Angular)
         if (HttpMethod.OPTIONS.matches(request.getMethod())) return true;
 
-        // ✅ Públicos
-        return path.startsWith("/api/auth/")
-                || path.equals("/api/auth/login")
-                || path.equals("/api/auth/register")
+        // ✅ Rutas públicas (NO filtrar)
+        return path.startsWith("/api/auth")
                 || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs");
+                || path.startsWith("/v3/api-docs")
+                || path.equals("/swagger-ui.html");
     }
 
     @Override
@@ -50,21 +49,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String jwt = authHeader.substring(7);
-        String username = jwtService.extractUsername(jwt);
+        final String jwt = authHeader.substring(7);
+        final String username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            // ✅ normalmente la firma es isTokenValid(token, userDetails)
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            // ✅ COMPATIBLE con tu JwtService (String)
+            if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities()
                         );
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
