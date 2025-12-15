@@ -56,7 +56,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
 
     // ✅ Para Render / múltiples dominios (más flexible que allowedOrigins)
-    config.setAllowedOriginPatterns(List.of("*"))
+    config.setAllowedOriginPatterns(List.of("*"));
 
     config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
@@ -78,5 +78,6 @@ public CorsConfigurationSource corsConfigurationSource() {
         return new BCryptPasswordEncoder();
     }
 }
+
 
 
