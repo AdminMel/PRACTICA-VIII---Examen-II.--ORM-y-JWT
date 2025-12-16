@@ -66,7 +66,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     // ✅ ORÍGENES EXPLÍCITOS (NO "*")
     config.setAllowedOrigins(List.of(
             "http://localhost:4200",
-            "https://*.vercel.app",
+            "https://*.vercel.app/*",
             "https://practica-viii-examen-ii-orm-y-jwt.onrender.com"
     ));
 
@@ -101,5 +101,6 @@ public CorsConfigurationSource corsConfigurationSource() {
         return new BCryptPasswordEncoder();
     }
 }
+
 
 
