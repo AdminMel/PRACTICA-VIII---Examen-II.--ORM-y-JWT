@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,19 +33,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> {}) // ✅ activa CORS usando el bean de abajo
+                // ✅ así SÍ toma tu CorsConfigurationSource
+                .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(eh -> eh
+                        // ✅ si no hay token -> 401 (más claro que 403)
+                        .authenticationEntryPoint((req, res, ex) -> res.sendError(401, "Unauthorized"))
+                        .accessDeniedHandler((req, res, ex) -> res.sendError(403, "Forbidden"))
+                )
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ IMPORTANTÍSIMO para Angular (preflight)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ Públicos
+                        // ✅ públicos
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // ✅ Swagger si lo usas
+                        // ✅ swagger
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 
-                        // ✅ Todo lo demás protegido
+                        // ✅ útil en producción (evita 403 raros cuando Spring cae en /error)
+                        .requestMatchers("/error").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -52,21 +60,23 @@ public class SecurityConfig {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
 
-    // ✅ Para Render / múltiples dominios (más flexible que allowedOrigins)
-    config.setAllowedOriginPatterns(List.of("*"));
+        // ✅ ORÍGENES EXPLÍCITOS (recomendado)
+        config.setAllowedOrigins(List.of("*"));
 
-    config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-    config.setAllowedHeaders(List.of("*"));
-    config.setExposedHeaders(List.of("Authorization"));
-    config.setAllowCredentials(true);
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        config.setExposedHeaders(List.of("Authorization"));
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-}
+        // ✅ si usarás Authorization header desde Angular, esto está bien
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -78,6 +88,3 @@ public CorsConfigurationSource corsConfigurationSource() {
         return new BCryptPasswordEncoder();
     }
 }
-
-
-
