@@ -60,23 +60,35 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ ORÍGENES EXPLÍCITOS (recomendado)
-        config.setAllowedOrigins(List.of("*"));
+    // ✅ ORÍGENES EXPLÍCITOS (NO "*")
+    config.setAllowedOrigins(List.of(
+            "http://localhost:4200",
+            "https://practica-viii-examen-ii-orm-y-jwt.onrender.com"
+    ));
 
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization","Content-Type"));
-        config.setExposedHeaders(List.of("Authorization"));
+    config.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+    ));
 
-        // ✅ si usarás Authorization header desde Angular, esto está bien
-        config.setAllowCredentials(true);
+    config.setAllowedHeaders(List.of(
+            "Authorization", "Content-Type"
+    ));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+    config.setExposedHeaders(List.of(
+            "Authorization"
+    ));
+
+    // ✅ válido SOLO porque NO usamos "*"
+    config.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return source;
+}
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -88,3 +100,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
