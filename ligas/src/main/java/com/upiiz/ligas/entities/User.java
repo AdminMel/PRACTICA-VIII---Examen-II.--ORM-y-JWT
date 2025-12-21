@@ -28,7 +28,7 @@ public class User implements UserDetails {
     @Column(nullable=false)
     private String password;
 
-    @Column(nullable=false, name="full_name")
+    @Column(nullable=false, name="fullName")
     private String fullName;
 
     @Enumerated(EnumType.STRING)
@@ -52,3 +52,4 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 }
+
