@@ -31,15 +31,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
+        // ✅ En Render/proxies es más confiable que getServletPath()
+        String path = request.getRequestURI();
 
         // ✅ Preflight
         if (HttpMethod.OPTIONS.matches(request.getMethod())) return true;
 
-        // ✅ Públicos
-        return path.startsWith("/api/auth/")
+        // ✅ Públicos (sin depender del "/" final)
+        return path.startsWith("/api/auth")          // cubre /api/auth y /api/auth/login
                 || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs");
+                || path.startsWith("/v3/api-docs")
+                || path.equals("/swagger-ui.html")
+                || path.equals("/error");
     }
 
     @Override
@@ -60,8 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String username;
         try {
-            username = jwtService.extractUsername(jwt); // ✅ regresa String
+            username = jwtService.extractUsername(jwt);
         } catch (Exception ex) {
+            // ✅ token malformado / inválido
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -76,15 +80,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 null,
                                 userDetails.getAuthorities()
                         );
-            
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-
         }
 
         chain.doFilter(request, response);
     }
 }
-
-
