@@ -33,26 +33,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                // ✅ así SÍ toma tu CorsConfigurationSource
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(eh -> eh
-                        // ✅ si no hay token -> 401 (más claro que 403)
                         .authenticationEntryPoint((req, res, ex) -> res.sendError(401, "Unauthorized"))
                         .accessDeniedHandler((req, res, ex) -> res.sendError(403, "Forbidden"))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ Preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ públicos
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // ✅ Auth público (cubre /api/auth y /api/auth/**)
+                        .requestMatchers("/api/auth", "/api/auth/**").permitAll()
 
-                        // ✅ swagger
+                        // ✅ Swagger público
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 
-                        // ✅ útil en producción (evita 403 raros cuando Spring cae en /error)
+                        // ✅ Evita bloqueos raros
                         .requestMatchers("/error").permitAll()
 
+                        // ✅ Todo lo demás protegido
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -60,36 +60,39 @@ public class SecurityConfig {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
 
-    // ✅ ORÍGENES EXPLÍCITOS (NO "*")
-    config.setAllowedOrigins(List.of(
-            "http://localhost:4200",
-            "https://*.vercel.app",
-            "https://practica-viii-examen-ii-orm-y-jwt.onrender.com"
-    ));
+        // ✅ Para orígenes EXACTOS (sin comodines)
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200"
+        ));
 
-    config.setAllowedMethods(List.of(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-    ));
+        // ✅ Para comodines como Vercel (obligatorio usar patterns)
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.vercel.app",
+                "https://practica-viii-examen-ii-orm-y-jwt.onrender.com"
+        ));
 
-    config.setAllowedHeaders(List.of(
-            "Authorization", "Content-Type"
-    ));
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
 
-    config.setExposedHeaders(List.of(
-            "Authorization"
-    ));
+        config.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type"
+        ));
 
-    // ✅ válido SOLO porque NO usamos "*"
-    config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of(
+                "Authorization"
+        ));
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-}
+        // ✅ Solo válido si NO usas "*" en allowed origins
+        config.setAllowCredentials(true);
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -101,8 +104,3 @@ public CorsConfigurationSource corsConfigurationSource() {
         return new BCryptPasswordEncoder();
     }
 }
-
-
-
-
-
